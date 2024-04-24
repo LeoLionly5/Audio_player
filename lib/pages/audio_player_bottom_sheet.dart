@@ -1,5 +1,6 @@
+import 'package:flutter/widgets.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/components/album_cover.dart';
 import 'package:music_player/components/control_buttons.dart';
@@ -48,43 +49,60 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
         if (state?.sequence.isEmpty ?? true) {
           return const SizedBox();
         }
-        final metaData = state!.currentSource!.tag as Metadata;
+        final mediaItem = state!.currentSource!.tag as MediaItem;
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 专辑封面
-            Center(
-              child: AlbumCover(
-                size: 200,
-                albumArt: metaData.albumArt,
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            // 歌名
-            Text(metaData.trackName ??
-                (metaData.filePath?.split('/').last ?? 'Unknown track name')),
-            // 作者
             const SizedBox(
               height: 10,
             ),
-            // TODO 美化
-            Text(metaData.trackArtistNames?.join(', ') ?? 'Unknown artist'),
-            // 按钮组
-            ControlButtons(audioPlayer: widget.audioPlayer),
-            // 播放进度条
-            StreamBuilder<PositionData>(
-              stream: _positionDataStream,
-              builder: (context, snapshot) {
-                final positionData = snapshot.data;
-                return SeekBar(
-                  duration: positionData?.duration ?? Duration.zero,
-                  position: positionData?.position ?? Duration.zero,
-                  onChangeEnd: widget.audioPlayer.seek,
-                );
-              },
+            const Icon(Icons.keyboard_arrow_down),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 专辑封面
+                  Center(
+                    child: AlbumCover(
+                      size: 200,
+                      albumArt: mediaItem.extras?['albumArt'],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  // 歌名
+                  Text(mediaItem.title.isNotEmpty
+                      ? mediaItem.title
+                      : 'Unknown track name'),
+                  // 作者
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // TODO 美化
+                  Text(mediaItem.album ?? 'Unknown album'),
+                  // 作者
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // TODO 美化
+                  Text(mediaItem.artist ?? 'Unknown artist'),
+                  // 按钮组
+                  ControlButtons(audioPlayer: widget.audioPlayer),
+                  // 播放进度条
+                  StreamBuilder<PositionData>(
+                    stream: _positionDataStream,
+                    builder: (context, snapshot) {
+                      final positionData = snapshot.data;
+                      return SeekBar(
+                        duration: positionData?.duration ?? Duration.zero,
+                        position: positionData?.position ?? Duration.zero,
+                        onChangeEnd: widget.audioPlayer.seek,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         );

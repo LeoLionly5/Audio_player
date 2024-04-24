@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:music_player/components/album_cover.dart';
 import 'package:music_player/providers.dart';
 
@@ -24,31 +24,33 @@ class FileList extends ConsumerStatefulWidget {
 
 class _FileListState extends ConsumerState<FileList>
     with WidgetsBindingObserver {
-  List<UriAudioSource> playList = [];
-
-  Future<void> _scanFiles(String folderPath, WidgetRef ref) async {
-    playList.clear();
+  Future<List<UriAudioSource>?> _scanFiles(
+      String folderPath, WidgetRef ref) async {
+    List<UriAudioSource> playList = [];
+    // playList.clear();
     Directory directory = Directory(folderPath);
     try {
       List<FileSystemEntity> entities = directory.listSync();
-
       for (FileSystemEntity entity in entities) {
         if (entity is File && isAudio(entity.path)) {
-          final metaData = await MetadataRetriever.fromFile(File(entity.path));
-          playList.add(AudioSource.file(entity.path, tag: metaData));
+          final mediaItem = await getMediaItem(entity.path);
+          playList.add(AudioSource.file(entity.path, tag: mediaItem));
         }
       }
+      return playList;
     } catch (e) {
       if (kDebugMode) {
         print(e);
       }
     }
+    return null;
   }
 
-  Future<void> _onMusicClicked(int index) async {
+  Future<void> _onMusicClicked(int index, List<UriAudioSource> playList) async {
     await widget.audioPlayer.setAudioSource(
         ConcatenatingAudioSource(children: playList),
-        initialIndex: index);
+        initialIndex: index,
+        initialPosition: Duration.zero);
     widget.audioPlayer.play();
   }
 
@@ -59,7 +61,10 @@ class _FileListState extends ConsumerState<FileList>
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator()); // 等待加载指示器
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Text('error when scan files');
           } else {
+            final playList = snapshot.data!;
             return ListView.separated(
               separatorBuilder: (context, index) {
                 return const Divider(
@@ -69,21 +74,18 @@ class _FileListState extends ConsumerState<FileList>
               },
               itemCount: playList.length,
               itemBuilder: (context, index) {
-                final metaData = playList[index].tag as Metadata;
-                final trackName = (metaData.trackName ??
-                        metaData.filePath?.split('/').last) ??
-                    'Unknown name';
-                final artistName =
-                    metaData.trackArtistNames?.join(", ") ?? 'Unknown artist';
-                final albumName = metaData.albumName ?? 'Unknown album';
+                final mediaItem = playList[index].tag as MediaItem;
+                final trackName = mediaItem.title;
+                final artistName = mediaItem.artist ?? 'Unknown artist';
+                final albumName = mediaItem.album ?? 'Unknown album';
                 return ListTile(
                   leading: AlbumCover(
                     size: 40,
-                    albumArt: metaData.albumArt,
+                    albumArt: mediaItem.extras?['albumArt'],
                   ),
                   title: Text(trackName),
                   subtitle: Text('$artistName - $albumName'),
-                  onTap: () => _onMusicClicked(index),
+                  onTap: () => _onMusicClicked(index, playList),
                 );
               },
             );

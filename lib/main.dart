@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:music_player/pages/base_page.dart';
 
-void main() {
+Future<void> main() async {
+  // 后台播放以及通知栏控制
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
       child: MaterialApp(
         themeMode: ThemeMode.system, // 设置主题模式为跟随系统
         theme: ThemeData.light(), // 浅色主题
-        darkTheme: ThemeData.dark(), // 深色主题
+        darkTheme: ThemeData.dark().copyWith(
+          splashColor: Colors.transparent, // 设置为透明色，防止点击ListTile后出现灰色效果
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.greenAccent,
+            brightness: Brightness.dark,
+          ),
+        ), // 深色主题
         title: 'SHY Music Player',
         // theme: ThemeData(
         //   // This is the theme of your application.

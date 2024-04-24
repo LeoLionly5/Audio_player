@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:music_player/components/album_cover.dart';
 import 'package:music_player/components/play_pause_replay_button.dart';
 import 'package:music_player/pages/audio_player_bottom_sheet.dart';
@@ -28,11 +28,12 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
         } else {
           hasSelectedAudio = true;
         }
-        final metaData = hasSelectedAudio
-            ? state!.currentSource!.tag as Metadata
-            : const Metadata();
-        final audioName = metaData.trackName ??
-            (metaData.filePath?.split('/').last ?? 'Please select an audio');
+        final mediaItem = hasSelectedAudio
+            ? state!.currentSource!.tag as MediaItem
+            : const MediaItem(id: '', title: '');
+        final audioName = mediaItem.title.isNotEmpty
+            ? mediaItem.title
+            : 'Please select an audio';
         return GestureDetector(
           onTap: hasSelectedAudio
               ? () {
@@ -72,7 +73,7 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                 // 音乐封面
                 AlbumCover(
                   size: 40,
-                  albumArt: metaData.albumArt,
+                  albumArt: mediaItem.extras?['albumArt'],
                 ),
                 const SizedBox(
                   width: 20,
