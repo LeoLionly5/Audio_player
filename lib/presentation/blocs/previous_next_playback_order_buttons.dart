@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
-// 下一首音乐按钮
+// 播放顺序按钮
 class PlaybackOrderButton extends ConsumerWidget {
   const PlaybackOrderButton(
       {Key? key, required this.player, required this.iconSize})
@@ -35,7 +35,7 @@ class PlaybackOrderButton extends ConsumerWidget {
         );
       },
     );
-
+    // TODO: 乱序
     //     iconWidget = SvgPicture.asset(
     //       'assets/icons/shuffle_arrow.svg',
     //       colorFilter:
@@ -75,12 +75,15 @@ class NextButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // player.loopMode
     return StreamBuilder<SequenceState?>(
       stream: player.sequenceStateStream,
       builder: (context, snapshot) => IconButton(
         icon: const Icon(Icons.skip_next),
         iconSize: iconSize,
         onPressed: player.hasNext ? player.seekToNext : null,
+        // onPressed: () => player.seek(Duration.zero, index: 0),
+        // onPressed: () => player.seek(Duration.zero, index: 3),
       ),
     );
   }

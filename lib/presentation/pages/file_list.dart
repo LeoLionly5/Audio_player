@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:music_player/components/album_cover.dart';
-import 'package:music_player/providers.dart';
+import 'package:music_player/presentation/widgets/album_cover.dart';
+import 'package:music_player/presentation/providers/providers.dart';
 
-import '../custom_classes/common_functions.dart';
+import '../../utils/common_functions.dart';
 
 // 音乐文件列表页面
 class FileList extends ConsumerStatefulWidget {
@@ -50,8 +51,22 @@ class _FileListState extends ConsumerState<FileList>
     await widget.audioPlayer.setAudioSource(
         ConcatenatingAudioSource(children: playList),
         initialIndex: index,
-        initialPosition: Duration.zero);
+        preload: false); // 设置preload为false，并用play()隐式加载音频。否则会有第一次播放不从头的bug
     widget.audioPlayer.play();
+
+    // TODO: Solve the bug of play order when playing mfs's songs
+    // widget.audioPlayer.playbackEventStream.listen((event) {},
+    //     onError: (Object e, StackTrace st) {
+    //   if (e is PlatformException) {
+    //     print(
+    //         '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    //     print('Error code: ${e.code}');
+    //     print('Error message: ${e.message}');
+    //     print('AudioSource index: ${e.details?["index"]}');
+    //   } else {
+    //     print('An error occurred: $e');
+    //   }
+    // });
   }
 
   @override

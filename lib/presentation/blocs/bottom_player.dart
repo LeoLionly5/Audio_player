@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:music_player/components/album_cover.dart';
-import 'package:music_player/components/play_pause_replay_button.dart';
-import 'package:music_player/pages/audio_player_bottom_sheet.dart';
+import 'package:music_player/presentation/widgets/album_cover.dart';
+import 'package:music_player/presentation/blocs/play_pause_replay_button.dart';
+import 'package:music_player/presentation/pages/audio_player_bottom_sheet.dart';
 
 class BottomPlayer extends ConsumerStatefulWidget {
   const BottomPlayer({super.key, required this.audioPlayer});

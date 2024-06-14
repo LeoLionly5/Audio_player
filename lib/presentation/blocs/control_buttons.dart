@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:music_player/components/play_pause_replay_button.dart';
-import 'package:music_player/components/previous_next_playback_order_buttons.dart';
+import 'package:music_player/presentation/blocs/play_pause_replay_button.dart';
+import 'package:music_player/presentation/blocs/previous_next_playback_order_buttons.dart';
 
 class ControlButtons extends StatelessWidget {
   const ControlButtons({super.key, required this.audioPlayer});

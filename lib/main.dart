@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:music_player/pages/base_page.dart';
+import 'package:music_player/presentation/pages/base_page.dart';
 
 Future<void> main() async {
   // 后台播放以及通知栏控制

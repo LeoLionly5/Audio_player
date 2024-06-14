@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:music_player/custom_classes/common_functions.dart';
-import 'package:music_player/custom_classes/custom_data_classes.dart';
-import 'package:music_player/providers.dart';
+import 'package:music_player/domain/entities/folder.dart';
+import 'package:music_player/utils/common_functions.dart';
+import 'package:music_player/presentation/providers/providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +24,7 @@ class FolderList extends ConsumerStatefulWidget {
 }
 
 class FolderListState extends ConsumerState<FolderList> {
-  Map<String, FolderItem> audioFolderPaths = {};
+  Map<String, FolderEntity> audioFolderPaths = {};
   String selectedFolderPath = '';
   bool isScanning = false;
 
@@ -41,7 +41,7 @@ class FolderListState extends ConsumerState<FolderList> {
 
   // 扫描音乐并列出父文件夹
   void _scanMusic() async {
-    Map<String, FolderItem> currentMusicFolders = {};
+    Map<String, FolderEntity> currentMusicFolders = {};
     try {
       setState(() {
         isScanning = true;
@@ -155,12 +155,12 @@ class FolderListState extends ConsumerState<FolderList> {
                       itemCount: audioFolderPaths.length,
                       itemBuilder: (context, index) {
                         final audioAmount =
-                            audioFolderPaths.values.toList()[index].audioAmout;
+                            audioFolderPaths.values.toList()[index].audioAmount;
                         return ListTile(
                           title: Text(
                               audioFolderPaths.values.toList()[index].title),
                           subtitle: Text(
-                              '${audioFolderPaths.values.toList()[index].audioAmout} ${audioAmount > 1 ? 'songs in ' : 'song in '} ${audioFolderPaths.values.toList()[index].path}'),
+                              '${audioFolderPaths.values.toList()[index].audioAmount} ${audioAmount > 1 ? 'songs in ' : 'song in '} ${audioFolderPaths.values.toList()[index].path}'),
                           onTap: () => _onFolderClicked(
                               audioFolderPaths.values.toList()[index].path),
                         );
@@ -199,15 +199,16 @@ class FolderListState extends ConsumerState<FolderList> {
 }
 
 // 用于compute()方法，所以此方法不能放入任何类的内部，只能top-level
-Future<Map<String, FolderItem>> _scanMusicInBackground(String rootPath) async {
-  Map<String, FolderItem> currentAudioFolders = {};
+Future<Map<String, FolderEntity>> _scanMusicInBackground(
+    String rootPath) async {
+  Map<String, FolderEntity> currentAudioFolders = {};
   _scanDirectory(Directory(rootPath).listSync(), currentAudioFolders);
   return currentAudioFolders;
 }
 
 // 递归扫描文件夹
 void _scanDirectory(List<FileSystemEntity> entities,
-    Map<String, FolderItem> currentMusicFolders) {
+    Map<String, FolderEntity> currentMusicFolders) {
   try {
     for (FileSystemEntity entity in entities) {
       if (entity is Directory) {
@@ -221,8 +222,10 @@ void _scanDirectory(List<FileSystemEntity> entities,
           currentMusicFolders.update(
               parentFolder, (folderItem) => folderItem..increaseAudioAmount());
         } else {
-          currentMusicFolders.putIfAbsent(parentFolder,
-              () => FolderItem(parentFolder, parentFolder.split('/').last, 1));
+          currentMusicFolders.putIfAbsent(
+              parentFolder,
+              () =>
+                  FolderEntity(parentFolder, parentFolder.split('/').last, 1));
         }
       }
     }

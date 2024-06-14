@@ -5,7 +5,8 @@ bool isAudio(String path) {
   final lowerCasePath = path.toLowerCase();
   return lowerCasePath.endsWith('.flac') ||
       lowerCasePath.endsWith('.mp3') ||
-      lowerCasePath.endsWith('.wav');
+      lowerCasePath.endsWith('.wav') ||
+      lowerCasePath.endsWith('.m4a');
 }
 
 Future<MediaItem> getMediaItem(String path) async {

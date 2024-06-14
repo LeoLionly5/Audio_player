@@ -1,11 +1,10 @@
-import 'package:flutter/widgets.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:music_player/components/album_cover.dart';
-import 'package:music_player/components/control_buttons.dart';
-import 'package:music_player/components/seek_bar.dart';
-import 'package:music_player/custom_classes/custom_data_classes.dart';
+import 'package:music_player/domain/entities/audio_position.dart';
+import 'package:music_player/presentation/widgets/album_cover.dart';
+import 'package:music_player/presentation/blocs/control_buttons.dart';
+import 'package:music_player/presentation/blocs/seek_bar.dart';
 
 import 'package:rxdart/rxdart.dart';
 
@@ -33,12 +32,12 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
 
   /// Collects the data useful for displaying in a seek bar, using a handy
   /// feature of rx_dart to combine the 3 streams of interest into one.
-  Stream<PositionData> get _positionDataStream =>
-      Rx.combineLatest2<Duration, Duration?, PositionData>(
+  Stream<AudioPositionEntity> get _positionDataStream =>
+      Rx.combineLatest2<Duration, Duration?, AudioPositionEntity>(
           widget.audioPlayer.positionStream,
           widget.audioPlayer.durationStream,
           (position, duration) =>
-              PositionData(position, duration ?? Duration.zero));
+              AudioPositionEntity(position, duration ?? Duration.zero));
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +89,7 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
                   // 按钮组
                   ControlButtons(audioPlayer: widget.audioPlayer),
                   // 播放进度条
-                  StreamBuilder<PositionData>(
+                  StreamBuilder<AudioPositionEntity>(
                     stream: _positionDataStream,
                     builder: (context, snapshot) {
                       final positionData = snapshot.data;

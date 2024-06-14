@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:music_player/components/bottom_player.dart';
-import 'package:music_player/pages/file_list.dart';
-import 'package:music_player/pages/folder_list.dart';
-import 'package:music_player/providers.dart';
+import 'package:music_player/presentation/blocs/bottom_player.dart';
+import 'package:music_player/presentation/pages/file_list.dart';
+import 'package:music_player/presentation/pages/folder_list.dart';
+import 'package:music_player/presentation/providers/providers.dart';
 
 // 带有底部播放器的总页面，所有其他页面都被包括在此页面之内
 class BasePage extends ConsumerStatefulWidget {
@@ -40,14 +40,22 @@ class BasePageState extends ConsumerState<BasePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) {
+            return;
+          }
           // 当点击系统返回按钮时，执行_navigateToPage返回上一个页面
           List<int> navigationHistory = ref.watch(navigationHistoryProvider);
-          _navigateToPage(
-              navigationHistory.removeAt(navigationHistory.length - 1));
+          if (navigationHistory.isNotEmpty) {
+            _navigateToPage(
+                navigationHistory.removeAt(navigationHistory.length - 1));
+          } else {
+            return;
+          }
           // 返回false以阻止默认的返回按钮行为
-          return false;
+          // return false;
         },
         child: Scaffold(
           appBar: AppBar(
