@@ -1,6 +1,6 @@
 # Local audio player
 
-Personal use local audio player based on [just_sudio package](https://pub.dev/packages/just_audio).
+Personal use local audio player based on [assets_audio_player package](https://pub.dev/packages/assets_audio_player).
 Covers some basic operations:
 Scan folders and list folders containing audio files (flac, wav, mp3)
 List audio files
