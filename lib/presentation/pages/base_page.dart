@@ -1,13 +1,14 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/bottom_player.dart';
+import 'package:audio_player_flutter_test/presentation/pages/file_list.dart';
+import 'package:audio_player_flutter_test/presentation/pages/folder_list.dart';
+import 'package:audio_player_flutter_test/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:music_player/presentation/blocs/bottom_player.dart';
-import 'package:music_player/presentation/pages/file_list.dart';
-import 'package:music_player/presentation/pages/folder_list.dart';
-import 'package:music_player/presentation/providers/providers.dart';
 
-// 带有底部播放器的总页面，所有其他页面都被包括在此页面之内
+/// The main page with the bottom player, all other pages are included in this page
 class BasePage extends ConsumerStatefulWidget {
+  /// The main page with the bottom player, all other pages are included in this page
   const BasePage({super.key});
 
   @override
@@ -15,11 +16,11 @@ class BasePage extends ConsumerStatefulWidget {
 }
 
 class BasePageState extends ConsumerState<BasePage> {
-  final audioPlayer = AudioPlayer();
+  final audioPlayer = AssetsAudioPlayer();
 
   int _currentPageIndex = 0;
 
-  // 用于切换文件夹页面和文件页面的导航方法
+  // Navigation method for switching between folder pages and file pages
   void _navigateToPage(int index) {
     setState(() {
       _currentPageIndex = index;
@@ -29,7 +30,19 @@ class BasePageState extends ConsumerState<BasePage> {
   @override
   void initState() {
     super.initState();
-    audioPlayer.setLoopMode(LoopMode.all);
+    audioPlayer.onErrorDo = (handler) {
+      // It shows network error from assets audio player package, when some of the audio files
+      if (handler.error.errorType == AssetsAudioPlayerErrorType.Network) {
+        if (audioPlayer.loopMode.value == LoopMode.playlist) {
+          handler.player.next();
+        } else {
+          handler.player.stop();
+          handler.player.seek(Duration.zero);
+          handler.player.play();
+        }
+      }
+      // TODO log the error
+    };
   }
 
   @override
@@ -46,7 +59,7 @@ class BasePageState extends ConsumerState<BasePage> {
           if (didPop) {
             return;
           }
-          // 当点击系统返回按钮时，执行_navigateToPage返回上一个页面
+          // When the system back button is clicked, execute _navigateToPage to return to the previous page
           List<int> navigationHistory = ref.watch(navigationHistoryProvider);
           if (navigationHistory.isNotEmpty) {
             _navigateToPage(
@@ -54,8 +67,6 @@ class BasePageState extends ConsumerState<BasePage> {
           } else {
             return;
           }
-          // 返回false以阻止默认的返回按钮行为
-          // return false;
         },
         child: Scaffold(
           appBar: AppBar(

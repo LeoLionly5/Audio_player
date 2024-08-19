@@ -1,30 +1,75 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/bottom_player.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/play_pause_replay_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/streams.dart';
 
-import 'package:music_player/main.dart';
+class MockAssetsAudioPlayer extends Mock implements AssetsAudioPlayer {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('BottomPlayer when there is no music file selected',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(home: BottomPlayer(audioPlayer: AssetsAudioPlayer())));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Please select an audio'), findsOneWidget);
+    expect(find.byIcon(Icons.music_note), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+            (Widget widget) => widget is PlayPauseReplayButton),
+        findsNothing);
   });
+
+  // testWidgets('BottomPlayer when there is one music file selected',
+  //     (WidgetTester tester) async {
+  //   final player = MockAssetsAudioPlayer();
+  //   final playList = Playlist(audios: []);
+
+  //   final audio = Audio.network(
+  //     "/assets/musics/test1.flac",
+  //     metas: Metas(
+  //       title: "test1 title",
+  //       artist: "test1 artist",
+  //       album: "test1 album",
+  //     ),
+  //   );
+
+  //   playList.audios.add(audio);
+
+  //   // Mock the current stream
+  //   final currentAudio =
+  //       PlayingAudio(audio: audio, duration: const Duration(minutes: 1));
+
+  //   final playing = Playing(
+  //       audio: currentAudio,
+  //       index: 0,
+  //       hasNext: false,
+  //       playlist: ReadingPlaylist(audios: [audio]));
+
+  //   when(player.current)
+  //       .thenAnswer((_) => Stream<Playing?>.value(playing).shareValue());
+
+  //   // Mock the open method to complete immediately
+  //   when(player.open(playList..startIndex = 0, loopMode: LoopMode.playlist))
+  //       .thenAnswer((_) async {});
+
+  //   await tester
+  //       .pumpWidget(MaterialApp(home: BottomPlayer(audioPlayer: player)));
+
+  //   await player.open(playList..startIndex = 0, loopMode: LoopMode.playlist);
+
+  //   await tester.pump();
+
+  //   expect(find.text('Please select an audio'), findsNothing);
+  //   expect(find.byIcon(Icons.music_note), findsOneWidget);
+  //   expect(
+  //       find.byWidgetPredicate(
+  //           (Widget widget) => widget is PlayPauseReplayButton),
+  //       findsOneWidget);
+  //   // expect(player.open(playList..startIndex = 0, loopMode: LoopMode.playlist),
+  //   //     completes);
+  // });
 }

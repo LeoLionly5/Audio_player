@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+/// Seek bar to adjust playing position
 class SeekBar extends StatefulWidget {
   final Duration duration;
   final Duration position;
@@ -9,14 +10,15 @@ class SeekBar extends StatefulWidget {
   final ValueChanged<Duration>? onChanged;
   final ValueChanged<Duration>? onChangeEnd;
 
+  /// Seek bar to adjust playing position
   const SeekBar({
-    Key? key,
+    super.key,
     required this.duration,
     required this.position,
     // required this.bufferedPosition,
     this.onChanged,
     this.onChangeEnd,
-  }) : super(key: key);
+  });
 
   @override
   SeekBarState createState() => SeekBarState();
@@ -49,8 +51,6 @@ class SeekBarState extends State<SeekBar> {
             child: Slider(
               min: 0.0,
               max: widget.duration.inMilliseconds.toDouble(),
-              // value: min(widget.bufferedPosition.inMilliseconds.toDouble(),
-              //     widget.duration.inMilliseconds.toDouble()),
               value: widget.duration.inMilliseconds.toDouble(),
               onChanged: (value) {
                 setState(() {

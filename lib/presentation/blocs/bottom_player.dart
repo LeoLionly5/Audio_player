@@ -1,15 +1,16 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/play_pause_replay_button.dart';
+import 'package:audio_player_flutter_test/presentation/pages/audio_player_bottom_sheet.dart';
+import 'package:audio_player_flutter_test/presentation/widgets/album_cover.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
-import 'package:music_player/presentation/widgets/album_cover.dart';
-import 'package:music_player/presentation/blocs/play_pause_replay_button.dart';
-import 'package:music_player/presentation/pages/audio_player_bottom_sheet.dart';
 
+/// The bottom player bar, which contains the album img, name, play or pause button
 class BottomPlayer extends ConsumerStatefulWidget {
+  /// The bottom player bar, which contains the album img, name, play or pause button
   const BottomPlayer({super.key, required this.audioPlayer});
 
-  final AudioPlayer audioPlayer;
+  final AssetsAudioPlayer audioPlayer;
 
   @override
   BottomPlayerState createState() => BottomPlayerState();
@@ -18,30 +19,26 @@ class BottomPlayer extends ConsumerStatefulWidget {
 class BottomPlayerState extends ConsumerState<BottomPlayer> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<SequenceState?>(
-      stream: widget.audioPlayer.sequenceStateStream,
+    return StreamBuilder<Playing?>(
+      stream: widget.audioPlayer.current,
       builder: (context, snapshot) {
         final state = snapshot.data;
         late bool hasSelectedAudio;
-        if (state?.sequence.isEmpty ?? true) {
+        if (state?.audio.assetAudioPath.isEmpty ?? true) {
           hasSelectedAudio = false;
         } else {
           hasSelectedAudio = true;
         }
-        final mediaItem = hasSelectedAudio
-            ? state!.currentSource!.tag as MediaItem
-            : const MediaItem(id: '', title: '');
-        final audioName = mediaItem.title.isNotEmpty
-            ? mediaItem.title
-            : 'Please select an audio';
+        final mediaItem = hasSelectedAudio ? state!.audio.audio.metas : Metas();
+        final audioName = mediaItem.title ?? 'Please select an audio';
         return GestureDetector(
           onTap: hasSelectedAudio
               ? () {
-                  // 点击底部播放栏，打开播放器bottom sheet
+                  // Click the bottom play bar to open the player bottom sheet
                   showModalBottomSheet(
-                      // bottom sheet 解锁高度限制
+                      // Unlock height limit of the bottom sheet
                       isScrollControlled: true,
-                      // 重新限制高度
+                      // Re-limit height
                       constraints: BoxConstraints(
                           maxHeight: MediaQuery.of(context).size.height / 1.3),
                       context: context,
@@ -52,7 +49,8 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                 }
               : null,
           child: Container(
-            height: 60, // 调整悬浮播放器的高度
+            // TODO Better size control
+            height: 60, // Adjust the height of the floating player
             decoration: BoxDecoration(
               color: Colors.grey,
               boxShadow: [
@@ -70,10 +68,10 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                 const SizedBox(
                   width: 20,
                 ),
-                // 音乐封面
+                // TODO Better size control
                 AlbumCover(
                   size: 40,
-                  albumArt: mediaItem.extras?['albumArt'],
+                  albumArt: mediaItem.extra?['albumArt'],
                 ),
                 const SizedBox(
                   width: 20,
@@ -81,6 +79,7 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                 Expanded(child: Text(audioName)),
                 if (hasSelectedAudio)
                   // 播放/暂停/重播按钮
+                  // TODO Better size control
                   PlayPauseReplayButton(
                     player: widget.audioPlayer,
                     iconSize: 40,

@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+/// Album cover of the music file
 class AlbumCover extends StatelessWidget {
+  /// Album cover of the music file
   const AlbumCover({super.key, required this.size, this.albumArt});
 
   final double size;

@@ -1,19 +1,21 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/play_pause_replay_button.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/previous_next_playback_order_buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:music_player/presentation/blocs/play_pause_replay_button.dart';
-import 'package:music_player/presentation/blocs/previous_next_playback_order_buttons.dart';
 
+/// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
 class ControlButtons extends StatelessWidget {
+  /// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
   const ControlButtons({super.key, required this.audioPlayer});
 
-  final AudioPlayer audioPlayer;
+  final AssetsAudioPlayer audioPlayer;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 调整音量，根系统音量不同步，暂时移除
+        // Adjust the volume, the root system volume is out of sync, temporarily removed
         // IconButton(
         //   icon: const Icon(Icons.volume_up),
         //   onPressed: () {
@@ -29,9 +31,9 @@ class ControlButtons extends StatelessWidget {
         //     );
         //   },
         // ),
-        // 播放速度调节
+        // Playback speed adjustment
         StreamBuilder<double>(
-          stream: audioPlayer.speedStream,
+          stream: audioPlayer.playSpeed,
           builder: (context, snapshot) => IconButton(
             icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
                 style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -42,27 +44,31 @@ class ControlButtons extends StatelessWidget {
                 divisions: 10,
                 min: 0.5,
                 max: 1.5,
-                value: audioPlayer.speed,
-                stream: audioPlayer.speedStream,
-                onChanged: audioPlayer.setSpeed,
+                value: snapshot.data ?? 0,
+                stream: audioPlayer.playSpeed,
+                onChanged: audioPlayer.setPlaySpeed,
               );
             },
           ),
         ),
         PreviousButton(
           player: audioPlayer,
+          // TODO Better size control
           iconSize: 40,
         ),
         PlayPauseReplayButton(
           player: audioPlayer,
+          // TODO Better size control
           iconSize: 64,
         ),
         NextButton(
           player: audioPlayer,
+          // TODO Better size control
           iconSize: 40,
         ),
         PlaybackOrderButton(
           player: audioPlayer,
+          // TODO Better size control
           iconSize: 30,
         )
       ],

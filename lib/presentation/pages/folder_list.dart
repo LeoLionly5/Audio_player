@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_player_flutter_test/domain/entities/folder.dart';
+import 'package:audio_player_flutter_test/presentation/providers/providers.dart';
+import 'package:audio_player_flutter_test/utils/common_functions.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:music_player/domain/entities/folder.dart';
-import 'package:music_player/utils/common_functions.dart';
-import 'package:music_player/presentation/providers/providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 包含音乐文件的文件夹列表页面
+/// Folder list page containing music files
 class FolderList extends ConsumerStatefulWidget {
+  /// Folder list page containing music files
   const FolderList({super.key, required this.navigateToPage});
 
-  // 导航方法
   final Function(int) navigateToPage;
 
   @override
@@ -28,7 +28,7 @@ class FolderListState extends ConsumerState<FolderList> {
   String selectedFolderPath = '';
   bool isScanning = false;
 
-  // 检查储存权限
+  // Check storage permissions
   Future<void> _checkPermissionAndScanMusic() async {
     if (await Permission.storage.request().isGranted) {
       _scanMusic();
@@ -39,7 +39,7 @@ class FolderListState extends ConsumerState<FolderList> {
     }
   }
 
-  // 扫描音乐并列出父文件夹
+  // Scan music and list parent folders
   void _scanMusic() async {
     Map<String, FolderEntity> currentMusicFolders = {};
     try {
@@ -62,16 +62,16 @@ class FolderListState extends ConsumerState<FolderList> {
     }
   }
 
-  // 点击文件夹后，更新providers，导航到文件列表页面
+  // After clicking on the folder, update the providers and navigate to the file list page
   void _onFolderClicked(String folderPath) {
-    // 将点击的文件夹路径更新到provider
+    // Update the clicked folder path to the provider
     ref.read(currentFolderPathProvider.notifier).update((state) => folderPath);
-    // 将当前页面添加到导航历史
+    // Add the current page to the navigation history
     ref.read(navigationHistoryProvider.notifier).update((state) {
       return [...state, 0];
     });
-    // 导航到文件列表页面
-    // TODO 可以用其他的值，而不是1
+    // Navigate to the file list page
+    // TODO Can define another value, but not 1
     widget.navigateToPage(1);
   }
 
@@ -81,7 +81,7 @@ class FolderListState extends ConsumerState<FolderList> {
     _loadFolderPath();
   }
 
-  // 加载保存的数据
+  // Load saved data
   Future<void> _loadFolderPath() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('folderPath');
@@ -93,7 +93,7 @@ class FolderListState extends ConsumerState<FolderList> {
     }
   }
 
-  // 保存数据
+  // Save data
   Future<void> _saveFolderPath(String path) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('folderPath', path);
@@ -198,7 +198,7 @@ class FolderListState extends ConsumerState<FolderList> {
   }
 }
 
-// 用于compute()方法，所以此方法不能放入任何类的内部，只能top-level
+// Used for the compute() method, so this method cannot be placed inside any class, only top-level
 Future<Map<String, FolderEntity>> _scanMusicInBackground(
     String rootPath) async {
   Map<String, FolderEntity> currentAudioFolders = {};
@@ -206,7 +206,7 @@ Future<Map<String, FolderEntity>> _scanMusicInBackground(
   return currentAudioFolders;
 }
 
-// 递归扫描文件夹
+// Recursive scanning of folders
 void _scanDirectory(List<FileSystemEntity> entities,
     Map<String, FolderEntity> currentMusicFolders) {
   try {

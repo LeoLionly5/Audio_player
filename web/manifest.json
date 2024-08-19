@@ -1,6 +1,6 @@
 {
-    "name": "music_player",
-    "short_name": "music_player",
+    "name": "audio_player_flutter_test",
+    "short_name": "audio_player_flutter_test",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

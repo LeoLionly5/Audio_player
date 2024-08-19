@@ -1,17 +1,15 @@
-import 'package:just_audio_background/just_audio_background.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player_flutter_test/domain/entities/audio_position.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/control_buttons.dart';
+import 'package:audio_player_flutter_test/presentation/blocs/seek_bar.dart';
+import 'package:audio_player_flutter_test/presentation/widgets/album_cover.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:music_player/domain/entities/audio_position.dart';
-import 'package:music_player/presentation/widgets/album_cover.dart';
-import 'package:music_player/presentation/blocs/control_buttons.dart';
-import 'package:music_player/presentation/blocs/seek_bar.dart';
-
 import 'package:rxdart/rxdart.dart';
 
 class AudioPlayerBottomSheet extends StatefulWidget {
   const AudioPlayerBottomSheet({super.key, required this.audioPlayer});
 
-  final AudioPlayer audioPlayer;
+  final AssetsAudioPlayer audioPlayer;
 
   @override
   State<AudioPlayerBottomSheet> createState() => _AudioPlayerState();
@@ -19,6 +17,8 @@ class AudioPlayerBottomSheet extends StatefulWidget {
 
 class _AudioPlayerState extends State<AudioPlayerBottomSheet>
     with WidgetsBindingObserver {
+  Widget _bottomSheetWidget = const SizedBox();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -31,25 +31,24 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
   }
 
   /// Collects the data useful for displaying in a seek bar, using a handy
-  /// feature of rx_dart to combine the 3 streams of interest into one.
+  /// feature of rx_dart to combine the 2 streams of interest into one.
   Stream<AudioPositionEntity> get _positionDataStream =>
-      Rx.combineLatest2<Duration, Duration?, AudioPositionEntity>(
-          widget.audioPlayer.positionStream,
-          widget.audioPlayer.durationStream,
-          (position, duration) =>
-              AudioPositionEntity(position, duration ?? Duration.zero));
+      Rx.combineLatest2<Duration, Playing?, AudioPositionEntity>(
+          widget.audioPlayer.currentPosition,
+          widget.audioPlayer.current,
+          (position, playing) => AudioPositionEntity(position, playing));
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<SequenceState?>(
-      stream: widget.audioPlayer.sequenceStateStream,
+    return StreamBuilder<PlayingAudio?>(
+      stream: widget.audioPlayer.onReadyToPlay,
       builder: (context, snapshot) {
         final state = snapshot.data;
-        if (state?.sequence.isEmpty ?? true) {
-          return const SizedBox();
+        if (state?.assetAudioPath.isEmpty ?? true) {
+          return _bottomSheetWidget;
         }
-        final mediaItem = state!.currentSource!.tag as MediaItem;
-        return Column(
+        final mediaMetas = state!.audio.metas;
+        _bottomSheetWidget = Column(
           children: [
             const SizedBox(
               height: 10,
@@ -60,41 +59,36 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // 专辑封面
                   Center(
                     child: AlbumCover(
                       size: 200,
-                      albumArt: mediaItem.extras?['albumArt'],
+                      albumArt: mediaMetas.extra?['albumArt'],
                     ),
                   ),
                   const SizedBox(
                     height: 20,
                   ),
-                  // 歌名
-                  Text(mediaItem.title.isNotEmpty
-                      ? mediaItem.title
-                      : 'Unknown track name'),
-                  // 作者
+                  // Track name
+                  Text(mediaMetas.title ?? 'Unknown track name'),
                   const SizedBox(
                     height: 10,
                   ),
-                  // TODO 美化
-                  Text(mediaItem.album ?? 'Unknown album'),
-                  // 作者
+                  // TODO beautify
+                  Text(mediaMetas.album ?? 'Unknown album'),
                   const SizedBox(
                     height: 10,
                   ),
-                  // TODO 美化
-                  Text(mediaItem.artist ?? 'Unknown artist'),
-                  // 按钮组
+                  // TODO beautify
+                  Text(mediaMetas.artist ?? 'Unknown artist'),
                   ControlButtons(audioPlayer: widget.audioPlayer),
-                  // 播放进度条
+                  // Seek bar
                   StreamBuilder<AudioPositionEntity>(
                     stream: _positionDataStream,
                     builder: (context, snapshot) {
                       final positionData = snapshot.data;
                       return SeekBar(
-                        duration: positionData?.duration ?? Duration.zero,
+                        duration: positionData?.playing?.audio.duration ??
+                            Duration.zero,
                         position: positionData?.position ?? Duration.zero,
                         onChangeEnd: widget.audioPlayer.seek,
                       );
@@ -105,6 +99,7 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
             ),
           ],
         );
+        return _bottomSheetWidget;
       },
     );
   }
