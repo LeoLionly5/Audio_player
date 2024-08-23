@@ -83,7 +83,7 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
                   ),
                   // TODO beautify
                   Text(mediaMetas.artist ?? 'Unknown artist'),
-                  ControlButtons(),
+                  const ControlButtons(),
                   // Seek bar
                   StreamBuilder<AudioPositionModel>(
                     stream: _positionDataStream,
