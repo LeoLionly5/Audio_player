@@ -1,8 +1,12 @@
-import 'package:audio_player_flutter_test/presentation/pages/base_page.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_player/presentation/pages/base_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  GetIt.instance.registerSingleton<AssetsAudioPlayer>(AssetsAudioPlayer());
   runApp(const MyApp());
 }
 

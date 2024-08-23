@@ -1,4 +1,4 @@
-package com.example.audio_player_flutter_test
+package com.example.audio_player
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,17 +1,17 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/play_pause_replay_button.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/previous_next_playback_order_buttons.dart';
+import 'package:audio_player/presentation/widgets/play_pause_replay_button.dart';
+import 'package:audio_player/presentation/widgets/previous_next_playback_order_buttons.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 /// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
 class ControlButtons extends StatelessWidget {
   /// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
-  const ControlButtons({super.key, required this.audioPlayer});
-
-  final AssetsAudioPlayer audioPlayer;
+  const ControlButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -51,23 +51,19 @@ class ControlButtons extends StatelessWidget {
             },
           ),
         ),
-        PreviousButton(
-          player: audioPlayer,
+        const PreviousButton(
           // TODO Better size control
           iconSize: 40,
         ),
-        PlayPauseReplayButton(
-          player: audioPlayer,
+        const PlayPauseReplayButton(
           // TODO Better size control
           iconSize: 64,
         ),
-        NextButton(
-          player: audioPlayer,
+        const NextButton(
           // TODO Better size control
           iconSize: 40,
         ),
-        PlaybackOrderButton(
-          player: audioPlayer,
+        const PlaybackOrderButton(
           // TODO Better size control
           iconSize: 30,
         )

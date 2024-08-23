@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audio_player_flutter_test/domain/entities/folder.dart';
-import 'package:audio_player_flutter_test/presentation/providers/providers.dart';
-import 'package:audio_player_flutter_test/utils/common_functions.dart';
+import 'package:audio_player/data/models/folder.dart';
+import 'package:audio_player/domain/providers/providers.dart';
+import 'package:audio_player/domain/common_functions.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,7 @@ class FolderList extends ConsumerStatefulWidget {
 }
 
 class FolderListState extends ConsumerState<FolderList> {
-  Map<String, FolderEntity> audioFolderPaths = {};
+  Map<String, FolderModel> audioFolderPaths = {};
   String selectedFolderPath = '';
   bool isScanning = false;
 
@@ -41,7 +41,7 @@ class FolderListState extends ConsumerState<FolderList> {
 
   // Scan music and list parent folders
   void _scanMusic() async {
-    Map<String, FolderEntity> currentMusicFolders = {};
+    Map<String, FolderModel> currentMusicFolders = {};
     try {
       setState(() {
         isScanning = true;
@@ -199,16 +199,15 @@ class FolderListState extends ConsumerState<FolderList> {
 }
 
 // Used for the compute() method, so this method cannot be placed inside any class, only top-level
-Future<Map<String, FolderEntity>> _scanMusicInBackground(
-    String rootPath) async {
-  Map<String, FolderEntity> currentAudioFolders = {};
+Future<Map<String, FolderModel>> _scanMusicInBackground(String rootPath) async {
+  Map<String, FolderModel> currentAudioFolders = {};
   _scanDirectory(Directory(rootPath).listSync(), currentAudioFolders);
   return currentAudioFolders;
 }
 
 // Recursive scanning of folders
 void _scanDirectory(List<FileSystemEntity> entities,
-    Map<String, FolderEntity> currentMusicFolders) {
+    Map<String, FolderModel> currentMusicFolders) {
   try {
     for (FileSystemEntity entity in entities) {
       if (entity is Directory) {
@@ -222,10 +221,8 @@ void _scanDirectory(List<FileSystemEntity> entities,
           currentMusicFolders.update(
               parentFolder, (folderItem) => folderItem..increaseAudioAmount());
         } else {
-          currentMusicFolders.putIfAbsent(
-              parentFolder,
-              () =>
-                  FolderEntity(parentFolder, parentFolder.split('/').last, 1));
+          currentMusicFolders.putIfAbsent(parentFolder,
+              () => FolderModel(parentFolder, parentFolder.split('/').last, 1));
         }
       }
     }

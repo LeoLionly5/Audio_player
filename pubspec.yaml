@@ -1,4 +1,4 @@
-name: audio_player_flutter_test
+name: audio_player
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -50,6 +50,7 @@ dependencies:
   shared_preferences: ^2.2.2
   rxdart: ^0.27.3
   mockito: ^5.4.4
+  get_it: ^7.7.0
 
 dev_dependencies:
   flutter_test:

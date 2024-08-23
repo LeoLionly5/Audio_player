@@ -1,8 +1,8 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 
-class AudioPositionEntity {
+class AudioPositionModel {
   final Duration position;
   final Playing? playing;
 
-  AudioPositionEntity(this.position, this.playing);
+  AudioPositionModel(this.position, this.playing);
 }

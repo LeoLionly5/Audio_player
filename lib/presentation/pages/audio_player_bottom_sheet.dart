@@ -1,15 +1,16 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player_flutter_test/domain/entities/audio_position.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/control_buttons.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/seek_bar.dart';
-import 'package:audio_player_flutter_test/presentation/widgets/album_cover.dart';
+import 'package:audio_player/data/models/audio_position.dart';
+import 'package:audio_player/presentation/widgets/control_buttons.dart';
+import 'package:audio_player/presentation/widgets/seek_bar.dart';
+import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// The bottom sheet which includes the track details and playing controls
 class AudioPlayerBottomSheet extends StatefulWidget {
-  const AudioPlayerBottomSheet({super.key, required this.audioPlayer});
-
-  final AssetsAudioPlayer audioPlayer;
+  /// The bottom sheet which includes the track details and playing controls
+  const AudioPlayerBottomSheet({super.key});
 
   @override
   State<AudioPlayerBottomSheet> createState() => _AudioPlayerState();
@@ -19,6 +20,8 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
     with WidgetsBindingObserver {
   Widget _bottomSheetWidget = const SizedBox();
 
+  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -26,22 +29,22 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
       // Release the player's resources when not in use. We use "stop" so that
       // if the app resumes later, it will still remember what position to
       // resume from.
-      widget.audioPlayer.stop();
+      audioPlayer.stop();
     }
   }
 
   /// Collects the data useful for displaying in a seek bar, using a handy
   /// feature of rx_dart to combine the 2 streams of interest into one.
-  Stream<AudioPositionEntity> get _positionDataStream =>
-      Rx.combineLatest2<Duration, Playing?, AudioPositionEntity>(
-          widget.audioPlayer.currentPosition,
-          widget.audioPlayer.current,
-          (position, playing) => AudioPositionEntity(position, playing));
+  Stream<AudioPositionModel> get _positionDataStream =>
+      Rx.combineLatest2<Duration, Playing?, AudioPositionModel>(
+          audioPlayer.currentPosition,
+          audioPlayer.current,
+          (position, playing) => AudioPositionModel(position, playing));
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<PlayingAudio?>(
-      stream: widget.audioPlayer.onReadyToPlay,
+      stream: audioPlayer.onReadyToPlay,
       builder: (context, snapshot) {
         final state = snapshot.data;
         if (state?.assetAudioPath.isEmpty ?? true) {
@@ -80,9 +83,9 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
                   ),
                   // TODO beautify
                   Text(mediaMetas.artist ?? 'Unknown artist'),
-                  ControlButtons(audioPlayer: widget.audioPlayer),
+                  ControlButtons(),
                   // Seek bar
-                  StreamBuilder<AudioPositionEntity>(
+                  StreamBuilder<AudioPositionModel>(
                     stream: _positionDataStream,
                     builder: (context, snapshot) {
                       final positionData = snapshot.data;
@@ -90,7 +93,7 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet>
                         duration: positionData?.playing?.audio.duration ??
                             Duration.zero,
                         position: positionData?.position ?? Duration.zero,
-                        onChangeEnd: widget.audioPlayer.seek,
+                        onChangeEnd: audioPlayer.seek,
                       );
                     },
                   ),

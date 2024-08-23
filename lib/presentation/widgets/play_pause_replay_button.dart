@@ -1,18 +1,18 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 /// Play/Pause/Replay button
 class PlayPauseReplayButton extends StatelessWidget {
   /// Play/Pause/Replay button
-  const PlayPauseReplayButton(
-      {super.key, required this.player, required this.iconSize});
+  const PlayPauseReplayButton({super.key, required this.iconSize});
   final double iconSize;
-  final AssetsAudioPlayer player;
 
   @override
   Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
     return StreamBuilder<PlayerState>(
-      stream: player.playerState,
+      stream: audioPlayer.playerState,
       builder: (context, snapshot) {
         final playerState = snapshot.data;
         // if (processingState == ProcessingState.loading ||
@@ -28,19 +28,19 @@ class PlayPauseReplayButton extends StatelessWidget {
           return IconButton(
             icon: const Icon(Icons.play_arrow),
             iconSize: iconSize,
-            onPressed: player.play,
+            onPressed: audioPlayer.play,
           );
         } else if (playerState == PlayerState.play) {
           return IconButton(
             icon: const Icon(Icons.pause),
             iconSize: iconSize,
-            onPressed: player.pause,
+            onPressed: audioPlayer.pause,
           );
         } else {
           return IconButton(
             icon: const Icon(Icons.replay),
             iconSize: iconSize,
-            onPressed: () => player.seek(Duration.zero),
+            onPressed: () => audioPlayer.seek(Duration.zero),
           );
         }
       },

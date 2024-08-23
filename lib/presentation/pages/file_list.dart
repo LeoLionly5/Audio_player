@@ -1,22 +1,21 @@
 import 'dart:io';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player_flutter_test/presentation/providers/providers.dart';
-import 'package:audio_player_flutter_test/presentation/widgets/album_cover.dart';
+import 'package:audio_player/domain/providers/providers.dart';
+import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../utils/common_functions.dart';
+import '../../domain/common_functions.dart';
 
 /// Music file list page
 class FileList extends ConsumerStatefulWidget {
   /// Music file list page
-  const FileList(
-      {super.key, required this.navigateToPage, required this.audioPlayer});
+  const FileList({super.key, required this.navigateToPage});
 
   final Function(int) navigateToPage;
-  final AssetsAudioPlayer audioPlayer;
 
   @override
   ConsumerState<FileList> createState() => _FileListState();
@@ -24,6 +23,8 @@ class FileList extends ConsumerStatefulWidget {
 
 class _FileListState extends ConsumerState<FileList>
     with WidgetsBindingObserver {
+  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+
   Future<Playlist?> _scanFiles(String folderPath, WidgetRef ref) async {
     final playList = Playlist(audios: []);
 
@@ -46,8 +47,26 @@ class _FileListState extends ConsumerState<FileList>
   }
 
   Future<void> _onMusicClicked(int index, Playlist playList) async {
-    await widget.audioPlayer
-        .open(playList..startIndex = index, loopMode: LoopMode.playlist);
+    await audioPlayer.open(playList..startIndex = index,
+        loopMode: LoopMode.playlist,
+        showNotification: true,
+        notificationSettings: const NotificationSettings(
+          stopEnabled: false,
+          // prevEnabled: false, //disable the previous button
+
+          //and have a custom next action (will disable the default action)
+          //         customStopAction: (player) async {
+          //   print(
+          //       "nextnextnextnextnextnextnextnextnextnextnextnextnextnextnextnextnext");
+          //   const url = 'shyMusicPlayer'; // 这是本应用的 URL Scheme
+
+          //   final AndroidIntent intent = const AndroidIntent(
+          //     action: 'action_view',
+          //     data:
+          //         'com.example.audio_player', // replace com.example.app with your applicationId
+          //   );
+          //   await intent.launch();
+        ));
   }
 
   @override

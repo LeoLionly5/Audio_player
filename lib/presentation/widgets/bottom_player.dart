@@ -1,26 +1,25 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/play_pause_replay_button.dart';
-import 'package:audio_player_flutter_test/presentation/pages/audio_player_bottom_sheet.dart';
-import 'package:audio_player_flutter_test/presentation/widgets/album_cover.dart';
+import 'package:audio_player/presentation/widgets/play_pause_replay_button.dart';
+import 'package:audio_player/presentation/pages/audio_player_bottom_sheet.dart';
+import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
 /// The bottom player bar, which contains the album img, name, play or pause button
-class BottomPlayer extends ConsumerStatefulWidget {
+class BottomPlayer extends StatefulWidget {
   /// The bottom player bar, which contains the album img, name, play or pause button
-  const BottomPlayer({super.key, required this.audioPlayer});
-
-  final AssetsAudioPlayer audioPlayer;
+  const BottomPlayer({super.key});
 
   @override
   BottomPlayerState createState() => BottomPlayerState();
 }
 
-class BottomPlayerState extends ConsumerState<BottomPlayer> {
+class BottomPlayerState extends State<BottomPlayer> {
+  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Playing?>(
-      stream: widget.audioPlayer.current,
+      stream: audioPlayer.current,
       builder: (context, snapshot) {
         final state = snapshot.data;
         late bool hasSelectedAudio;
@@ -43,8 +42,7 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                           maxHeight: MediaQuery.of(context).size.height / 1.3),
                       context: context,
                       builder: (_) {
-                        return AudioPlayerBottomSheet(
-                            audioPlayer: widget.audioPlayer);
+                        return const AudioPlayerBottomSheet();
                       });
                 }
               : null,
@@ -80,8 +78,7 @@ class BottomPlayerState extends ConsumerState<BottomPlayer> {
                 if (hasSelectedAudio)
                   // 播放/暂停/重播按钮
                   // TODO Better size control
-                  PlayPauseReplayButton(
-                    player: widget.audioPlayer,
+                  const PlayPauseReplayButton(
                     iconSize: 40,
                   ),
                 const SizedBox(

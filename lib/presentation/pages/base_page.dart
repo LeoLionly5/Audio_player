@@ -1,10 +1,11 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player_flutter_test/presentation/blocs/bottom_player.dart';
-import 'package:audio_player_flutter_test/presentation/pages/file_list.dart';
-import 'package:audio_player_flutter_test/presentation/pages/folder_list.dart';
-import 'package:audio_player_flutter_test/presentation/providers/providers.dart';
+import 'package:audio_player/presentation/widgets/bottom_player.dart';
+import 'package:audio_player/presentation/pages/file_list.dart';
+import 'package:audio_player/presentation/pages/folder_list.dart';
+import 'package:audio_player/domain/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
 /// The main page with the bottom player, all other pages are included in this page
 class BasePage extends ConsumerStatefulWidget {
@@ -16,7 +17,7 @@ class BasePage extends ConsumerStatefulWidget {
 }
 
 class BasePageState extends ConsumerState<BasePage> {
-  final audioPlayer = AssetsAudioPlayer();
+  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
 
   int _currentPageIndex = 0;
 
@@ -76,11 +77,10 @@ class BasePageState extends ConsumerState<BasePage> {
             index: _currentPageIndex,
             children: <Widget>[
               FolderList(navigateToPage: _navigateToPage),
-              FileList(
-                  navigateToPage: _navigateToPage, audioPlayer: audioPlayer),
+              FileList(navigateToPage: _navigateToPage),
             ],
           ),
-          bottomNavigationBar: BottomPlayer(audioPlayer: audioPlayer),
+          bottomNavigationBar: const BottomPlayer(),
         ));
   }
 }

@@ -1,19 +1,19 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 /// Play back order button
-class PlaybackOrderButton extends ConsumerWidget {
+class PlaybackOrderButton extends StatelessWidget {
   /// Play back order button
-  const PlaybackOrderButton(
-      {super.key, required this.player, required this.iconSize});
+  const PlaybackOrderButton({super.key, required this.iconSize});
   final double iconSize;
-  final AssetsAudioPlayer player;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
     return StreamBuilder<LoopMode>(
-      stream: player.loopMode,
+      stream: audioPlayer.loopMode,
       builder: (context, snapshot) {
         final loopMode = snapshot.data ?? LoopMode.playlist;
         final icons = [
@@ -29,7 +29,7 @@ class PlaybackOrderButton extends ConsumerWidget {
           icon: icons[index],
           iconSize: iconSize,
           onPressed: () {
-            player.setLoopMode(cycleModes[
+            audioPlayer.setLoopMode(cycleModes[
                 (cycleModes.indexOf(loopMode) + 1) % cycleModes.length]);
           },
         );
@@ -47,14 +47,13 @@ class PlaybackOrderButton extends ConsumerWidget {
 }
 
 // 上一首音乐按钮
-class PreviousButton extends ConsumerWidget {
-  const PreviousButton({Key? key, required this.player, required this.iconSize})
-      : super(key: key);
+class PreviousButton extends StatelessWidget {
+  const PreviousButton({super.key, required this.iconSize});
   final double iconSize;
-  final AssetsAudioPlayer player;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
     // return StreamBuilder<SequenceState?>(
     //   stream: player.sequenceStateStream,
     //   builder: (context, snapshot) => IconButton(
@@ -66,7 +65,7 @@ class PreviousButton extends ConsumerWidget {
     return IconButton(
       icon: const Icon(Icons.skip_previous),
       iconSize: iconSize,
-      onPressed: player.previous,
+      onPressed: audioPlayer.previous,
       // onPressed: () => player.seek(Duration.zero, index: 0),
       // onPressed: () => player.seek(Duration.zero, index: 3),
     );
@@ -74,14 +73,13 @@ class PreviousButton extends ConsumerWidget {
 }
 
 // 下一首音乐按钮
-class NextButton extends ConsumerWidget {
-  const NextButton({Key? key, required this.player, required this.iconSize})
-      : super(key: key);
+class NextButton extends StatelessWidget {
+  const NextButton({super.key, required this.iconSize});
   final double iconSize;
-  final AssetsAudioPlayer player;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
     // player.loopMode
     // return StreamBuilder<SequenceState?>(
     //   stream: player.sequenceStateStream,
@@ -96,7 +94,7 @@ class NextButton extends ConsumerWidget {
     return IconButton(
       icon: const Icon(Icons.skip_next),
       iconSize: iconSize,
-      onPressed: player.next,
+      onPressed: audioPlayer.next,
       // onPressed: () => player.seek(Duration.zero, index: 0),
       // onPressed: () => player.seek(Duration.zero, index: 3),
     );
