@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player/domain/providers/providers.dart';
+import 'package:audio_player/providers/providers.dart';
 import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../domain/common_functions.dart';
+import '../../utils/common_functions.dart';
 
 /// Music file list page
 class FileList extends ConsumerStatefulWidget {
@@ -21,8 +21,7 @@ class FileList extends ConsumerStatefulWidget {
   ConsumerState<FileList> createState() => _FileListState();
 }
 
-class _FileListState extends ConsumerState<FileList>
-    with WidgetsBindingObserver {
+class _FileListState extends ConsumerState<FileList> with WidgetsBindingObserver {
   final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
 
   Future<Playlist?> _scanFiles(String folderPath, WidgetRef ref) async {

@@ -2,7 +2,7 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audio_player/presentation/widgets/bottom_player.dart';
 import 'package:audio_player/presentation/pages/file_list.dart';
 import 'package:audio_player/presentation/pages/folder_list.dart';
-import 'package:audio_player/domain/providers/providers.dart';
+import 'package:audio_player/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
@@ -63,8 +63,7 @@ class BasePageState extends ConsumerState<BasePage> {
           // When the system back button is clicked, execute _navigateToPage to return to the previous page
           List<int> navigationHistory = ref.watch(navigationHistoryProvider);
           if (navigationHistory.isNotEmpty) {
-            _navigateToPage(
-                navigationHistory.removeAt(navigationHistory.length - 1));
+            _navigateToPage(navigationHistory.removeAt(navigationHistory.length - 1));
           } else {
             return;
           }

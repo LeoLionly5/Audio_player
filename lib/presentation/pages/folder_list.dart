@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_player/data/models/folder.dart';
-import 'package:audio_player/domain/providers/providers.dart';
-import 'package:audio_player/domain/common_functions.dart';
+import 'package:audio_player/providers/providers.dart';
+import 'package:audio_player/utils/common_functions.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,7 @@ class FolderListState extends ConsumerState<FolderList> {
 
   // Check storage permissions
   Future<void> _checkPermissionAndScanMusic() async {
-    if (await Permission.storage.request().isGranted) {
+    if (await Permission.manageExternalStorage.request().isGranted) {
       _scanMusic();
     } else {
       if (kDebugMode) {
@@ -123,8 +123,7 @@ class FolderListState extends ConsumerState<FolderList> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            selectedFolderPath =
-                                (await _openFileExplorer(context)) ?? '';
+                            selectedFolderPath = (await _openFileExplorer(context)) ?? '';
                             await _checkPermissionAndScanMusic();
                             await _saveFolderPath(selectedFolderPath);
                           },
@@ -154,15 +153,13 @@ class FolderListState extends ConsumerState<FolderList> {
                       },
                       itemCount: audioFolderPaths.length,
                       itemBuilder: (context, index) {
-                        final audioAmount =
-                            audioFolderPaths.values.toList()[index].audioAmount;
+                        final audioAmount = audioFolderPaths.values.toList()[index].audioAmount;
                         return ListTile(
-                          title: Text(
-                              audioFolderPaths.values.toList()[index].title),
+                          title: Text(audioFolderPaths.values.toList()[index].title),
                           subtitle: Text(
                               '${audioFolderPaths.values.toList()[index].audioAmount} ${audioAmount > 1 ? 'songs in ' : 'song in '} ${audioFolderPaths.values.toList()[index].path}'),
-                          onTap: () => _onFolderClicked(
-                              audioFolderPaths.values.toList()[index].path),
+                          onTap: () =>
+                              _onFolderClicked(audioFolderPaths.values.toList()[index].path),
                         );
                       },
                     ),
@@ -175,8 +172,7 @@ class FolderListState extends ConsumerState<FolderList> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        selectedFolderPath =
-                            (await _openFileExplorer(context)) ?? '';
+                        selectedFolderPath = (await _openFileExplorer(context)) ?? '';
                         await _checkPermissionAndScanMusic();
                         await _saveFolderPath(selectedFolderPath);
                       },
@@ -206,8 +202,7 @@ Future<Map<String, FolderModel>> _scanMusicInBackground(String rootPath) async {
 }
 
 // Recursive scanning of folders
-void _scanDirectory(List<FileSystemEntity> entities,
-    Map<String, FolderModel> currentMusicFolders) {
+void _scanDirectory(List<FileSystemEntity> entities, Map<String, FolderModel> currentMusicFolders) {
   try {
     for (FileSystemEntity entity in entities) {
       if (entity is Directory) {
@@ -221,8 +216,8 @@ void _scanDirectory(List<FileSystemEntity> entities,
           currentMusicFolders.update(
               parentFolder, (folderItem) => folderItem..increaseAudioAmount());
         } else {
-          currentMusicFolders.putIfAbsent(parentFolder,
-              () => FolderModel(parentFolder, parentFolder.split('/').last, 1));
+          currentMusicFolders.putIfAbsent(
+              parentFolder, () => FolderModel(parentFolder, parentFolder.split('/').last, 1));
         }
       }
     }
