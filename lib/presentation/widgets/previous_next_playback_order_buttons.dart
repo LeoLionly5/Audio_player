@@ -14,7 +14,9 @@ class PlaybackOrderButton extends ConsumerWidget {
     return StreamBuilder<LoopMode>(
       stream: audioPlayer.loopModeStream,
       builder: (context, snapshot) {
-        final loopMode = snapshot.data ?? LoopMode.all;
+        final loopMode = (snapshot.data == LoopMode.off || snapshot.data == null)
+            ? LoopMode.all
+            : snapshot.data!;
         final icons = [
           Icon(Icons.repeat, color: IconTheme.of(context).color!),
           Icon(Icons.repeat_one, color: IconTheme.of(context).color!),

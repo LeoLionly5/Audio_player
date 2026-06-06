@@ -3,9 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/presentation/widgets/bottom_player.dart';
-import 'package:music_player/presentation/pages/file_list.dart';
-import 'package:music_player/presentation/pages/folder_list.dart';
-import 'package:music_player/domain/providers/providers.dart';
 
 // 带有底部播放器的总页面，所有其他页面都被包括在此页面之内
 class BasePage extends ConsumerStatefulWidget {
@@ -16,17 +13,7 @@ class BasePage extends ConsumerStatefulWidget {
 }
 
 class BasePageState extends ConsumerState<BasePage> {
-  // final audioPlayer = AudioPlayer();
   final audioPlayer = GetIt.instance<AudioPlayer>();
-
-  int _currentPageIndex = 0;
-
-  // 用于切换文件夹页面和文件页面的导航方法
-  void _navigateToPage(int index) {
-    setState(() {
-      _currentPageIndex = index;
-    });
-  }
 
   @override
   void initState() {
@@ -44,28 +31,9 @@ class BasePageState extends ConsumerState<BasePage> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
-          if (didPop) {
-            return;
-          }
-          // 当点击系统返回按钮时，执行_navigateToPage返回上一个页面
-          List<int> navigationHistory = ref.watch(navigationHistoryProvider);
-          if (navigationHistory.isNotEmpty) {
-            _navigateToPage(navigationHistory.removeAt(navigationHistory.length - 1));
-          } else {
-            return;
-          }
-        },
         child: Scaffold(
           appBar: AppBar(
             title: const Center(child: Text('CZ Music Player')),
-          ),
-          body: IndexedStack(
-            index: _currentPageIndex,
-            children: <Widget>[
-              FolderList(navigateToPage: _navigateToPage),
-              FileList(navigateToPage: _navigateToPage),
-            ],
           ),
           bottomNavigationBar: const BottomPlayer(),
         ));

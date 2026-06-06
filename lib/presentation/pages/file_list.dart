@@ -13,9 +13,7 @@ import '../../utils/common_functions.dart';
 
 // 音乐文件列表页面
 class FileList extends ConsumerStatefulWidget {
-  const FileList({super.key, required this.navigateToPage});
-
-  final Function(int) navigateToPage;
+  const FileList({super.key});
 
   @override
   ConsumerState<FileList> createState() => _FileListState();

@@ -70,7 +70,12 @@ class _AudioPlayerState extends State<AudioPlayerBottomSheet> with WidgetsBindin
                     height: 20,
                   ),
                   // 歌名
-                  Text(mediaItem.title.isNotEmpty ? mediaItem.title : 'Unknown track name'),
+                  Text(
+                    mediaItem.title.isNotEmpty ? mediaItem.title : 'Unknown track name',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   // 作者
                   const SizedBox(
                     height: 10,

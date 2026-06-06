@@ -10,14 +10,12 @@ import 'package:music_player/domain/providers/providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // 包含音乐文件的文件夹列表页面
 class FolderList extends ConsumerStatefulWidget {
-  const FolderList({super.key, required this.navigateToPage});
-
-  // 导航方法
-  final Function(int) navigateToPage;
+  const FolderList({super.key});
 
   @override
   FolderListState createState() => FolderListState();
@@ -110,13 +108,8 @@ class FolderListState extends ConsumerState<FolderList> {
   void _onFolderClicked(String folderPath) {
     // 将点击的文件夹路径更新到provider
     ref.read(currentFolderPathProvider.notifier).update((state) => folderPath);
-    // 将当前页面添加到导航历史
-    ref.read(navigationHistoryProvider.notifier).update((state) {
-      return [...state, 0];
-    });
-    // 导航到文件列表页面
-    // TODO 可以用其他的值，而不是1
-    widget.navigateToPage(1);
+    // 使用 go_router 跳转到文件列表页面
+    context.push('/files');
   }
 
   @override
