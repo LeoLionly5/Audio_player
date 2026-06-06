@@ -1,36 +1,36 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:flutter/material.dart';
 
-/// Play/Pause/Replay button
+// 播放/暂停/重播按钮
 class PlayPauseReplayButton extends StatelessWidget {
-  /// Play/Pause/Replay button
   const PlayPauseReplayButton({super.key, required this.iconSize});
   final double iconSize;
 
   @override
   Widget build(BuildContext context) {
-    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+    final audioPlayer = GetIt.instance<AudioPlayer>();
     return StreamBuilder<PlayerState>(
-      stream: audioPlayer.playerState,
+      stream: audioPlayer.playerStateStream,
       builder: (context, snapshot) {
         final playerState = snapshot.data;
-        // if (processingState == ProcessingState.loading ||
-        //     processingState == ProcessingState.buffering) {
-        //   return Container(
-        //     margin: const EdgeInsets.all(8.0),
-        //     width: iconSize,
-        //     height: iconSize,
-        //     child: const CircularProgressIndicator(),
-        //   );
-        // }
-        if (playerState == PlayerState.pause) {
+        final processingState = playerState?.processingState;
+        final playing = playerState?.playing;
+        if (processingState == ProcessingState.loading ||
+            processingState == ProcessingState.buffering) {
+          return Container(
+            margin: const EdgeInsets.all(8.0),
+            width: iconSize,
+            height: iconSize,
+            child: const CircularProgressIndicator(),
+          );
+        } else if (playing != true) {
           return IconButton(
             icon: const Icon(Icons.play_arrow),
             iconSize: iconSize,
             onPressed: audioPlayer.play,
           );
-        } else if (playerState == PlayerState.play) {
+        } else if (processingState != ProcessingState.completed) {
           return IconButton(
             icon: const Icon(Icons.pause),
             iconSize: iconSize,

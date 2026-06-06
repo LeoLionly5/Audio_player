@@ -1,5 +1,5 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/services.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 bool isAudio(String path) {
   final lowerCasePath = path.toLowerCase();
@@ -9,42 +9,34 @@ bool isAudio(String path) {
       lowerCasePath.endsWith('.m4a');
 }
 
-Future<Metas> getMediaMetas(String path) async {
-  // MediaItem({
-  //   required this.id,
-  //   required this.title,
-  //   this.album,
-  //   this.artist,
-  //   this.genre,
-  //   this.duration,
-  //   this.artUri,
-  //   this.artHeaders,
-  //   this.playable = true,
-  //   this.displayTitle,
-  //   this.displaySubtitle,
-  //   this.displayDescription,
-  //   this.rating,
-  //   this.extras,
-  // });
-  var metadata =
-      await const MethodChannel('flutter_media_metadata').invokeMethod(
-    'MetadataRetriever',
-    {
-      'filePath': path,
-    },
-  );
-  metadata['filePath'] = path;
-
-  return getMediaMetasfromJson(metadata);
+Future<MediaItem> getMediaItem(String trackPath) async {
+  try {
+    final audioMetadataTag = await getMeta(trackPath);
+    return MediaItem(
+      id: trackPath,
+      title: audioMetadataTag?['title'] ?? trackPath.split('/').last,
+      album: audioMetadataTag?['album'],
+      artist: audioMetadataTag?['artist'],
+      extras: {
+        'albumArt': audioMetadataTag?['albumArt'] != null
+            ? (audioMetadataTag?['albumArt'] as Uint8List)
+            : null
+      },
+    );
+  } catch (e) {
+    return MediaItem(
+      id: trackPath,
+      title: trackPath.split('/').last,
+    );
+  }
 }
 
-Metas getMediaMetasfromJson(dynamic map) => Metas(
-      id: map['filePath'],
-      title: map['metadata']['trackName'] ?? map['filePath'].split('/').last,
-      artist: map['metadata']['trackArtistNames']?.split('/').join(', '),
-      album: map['metadata']['albumName'],
-      extra: {'albumArt': map['albumArt']},
-    );
+const channel = MethodChannel('audio_meta');
+
+Future<Map?> getMeta(String path) async {
+  final result = await channel.invokeMethod('getMeta', path);
+  return Map<String, dynamic>.from(result);
+}
 
 int? parseDurationInteger(dynamic value) {
   if (value == null) {

@@ -5,19 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Audio_player",
+            "name": "audio_player",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart"
         },
         {
-            "name": "Audio_player (profile mode)",
+            "name": "audio_player (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "Audio_player (release mode)",
+            "name": "audio_player (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
