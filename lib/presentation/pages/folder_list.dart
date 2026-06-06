@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audio_player/data/models/folder.dart';
-import 'package:audio_player/providers/providers.dart';
-import 'package:audio_player/utils/common_functions.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:music_player/domain/entities/folder_entity.dart';
+import 'package:music_player/utils/common_functions.dart';
+import 'package:music_player/domain/providers/providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Folder list page containing music files
+// 包含音乐文件的文件夹列表页面
 class FolderList extends ConsumerStatefulWidget {
-  /// Folder list page containing music files
   const FolderList({super.key, required this.navigateToPage});
 
+  // 导航方法
   final Function(int) navigateToPage;
 
   @override
@@ -24,31 +24,75 @@ class FolderList extends ConsumerStatefulWidget {
 }
 
 class FolderListState extends ConsumerState<FolderList> {
-  Map<String, FolderModel> audioFolderPaths = {};
+  Map<String, FolderEntity> audioFolderPaths = {};
   String selectedFolderPath = '';
   bool isScanning = false;
 
-  // Check storage permissions
+  // 检查储存权限
   Future<void> _checkPermissionAndScanMusic() async {
-    if (await Permission.manageExternalStorage.request().isGranted) {
-      _scanMusic();
-    } else {
-      if (kDebugMode) {
-        print('no permission');
+    PermissionStatus status;
+
+    if (Platform.isAndroid) {
+      if (await Permission.audio.isGranted) {
+        status = PermissionStatus.granted;
+      } else {
+        status = await Permission.audio.request();
       }
+    } else {
+      status = await Permission.storage.request();
+    }
+
+    if (status.isGranted) {
+      _scanMusic();
+    } else if (status.isDenied) {
+      if (kDebugMode) {
+        print('Storage permission denied');
+      }
+      _showPermissionDialog();
+    } else if (status.isPermanentlyDenied) {
+      if (kDebugMode) {
+        print('Storage permission permanently denied');
+      }
+      openAppSettings();
     }
   }
 
-  // Scan music and list parent folders
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Permission required'),
+        content: const Text(
+          'This app needs access to your audio files to scan music. '
+          'Please grant storage permission.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 扫描音乐并列出父文件夹
   void _scanMusic() async {
-    Map<String, FolderModel> currentMusicFolders = {};
+    Map<String, FolderEntity> currentMusicFolders = {};
     try {
       setState(() {
         isScanning = true;
       });
       var searchPath = selectedFolderPath.isNotEmpty
           ? selectedFolderPath
-          : (await ExternalPath.getExternalStorageDirectories()).first;
+          : (await ExternalPath.getExternalStorageDirectories())!.first;
       currentMusicFolders = await compute(_scanMusicInBackground, searchPath);
     } catch (e) {
       if (kDebugMode) {
@@ -62,16 +106,16 @@ class FolderListState extends ConsumerState<FolderList> {
     }
   }
 
-  // After clicking on the folder, update the providers and navigate to the file list page
+  // 点击文件夹后，更新providers，导航到文件列表页面
   void _onFolderClicked(String folderPath) {
-    // Update the clicked folder path to the provider
+    // 将点击的文件夹路径更新到provider
     ref.read(currentFolderPathProvider.notifier).update((state) => folderPath);
-    // Add the current page to the navigation history
+    // 将当前页面添加到导航历史
     ref.read(navigationHistoryProvider.notifier).update((state) {
       return [...state, 0];
     });
-    // Navigate to the file list page
-    // TODO Can define another value, but not 1
+    // 导航到文件列表页面
+    // TODO 可以用其他的值，而不是1
     widget.navigateToPage(1);
   }
 
@@ -81,7 +125,7 @@ class FolderListState extends ConsumerState<FolderList> {
     _loadFolderPath();
   }
 
-  // Load saved data
+  // 加载保存的数据
   Future<void> _loadFolderPath() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString('folderPath');
@@ -93,7 +137,7 @@ class FolderListState extends ConsumerState<FolderList> {
     }
   }
 
-  // Save data
+  // 保存数据
   Future<void> _saveFolderPath(String path) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('folderPath', path);
@@ -194,15 +238,16 @@ class FolderListState extends ConsumerState<FolderList> {
   }
 }
 
-// Used for the compute() method, so this method cannot be placed inside any class, only top-level
-Future<Map<String, FolderModel>> _scanMusicInBackground(String rootPath) async {
-  Map<String, FolderModel> currentAudioFolders = {};
+// 用于compute()方法，所以此方法不能放入任何类的内部，只能top-level
+Future<Map<String, FolderEntity>> _scanMusicInBackground(String rootPath) async {
+  Map<String, FolderEntity> currentAudioFolders = {};
   _scanDirectory(Directory(rootPath).listSync(), currentAudioFolders);
   return currentAudioFolders;
 }
 
-// Recursive scanning of folders
-void _scanDirectory(List<FileSystemEntity> entities, Map<String, FolderModel> currentMusicFolders) {
+// 递归扫描文件夹
+void _scanDirectory(
+    List<FileSystemEntity> entities, Map<String, FolderEntity> currentMusicFolders) {
   try {
     for (FileSystemEntity entity in entities) {
       if (entity is Directory) {
@@ -217,7 +262,7 @@ void _scanDirectory(List<FileSystemEntity> entities, Map<String, FolderModel> cu
               parentFolder, (folderItem) => folderItem..increaseAudioAmount());
         } else {
           currentMusicFolders.putIfAbsent(
-              parentFolder, () => FolderModel(parentFolder, parentFolder.split('/').last, 1));
+              parentFolder, () => FolderEntity(parentFolder, parentFolder.split('/').last, 1));
         }
       }
     }

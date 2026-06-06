@@ -1,15 +1,14 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player/presentation/widgets/bottom_player.dart';
-import 'package:audio_player/presentation/pages/file_list.dart';
-import 'package:audio_player/presentation/pages/folder_list.dart';
-import 'package:audio_player/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:music_player/presentation/widgets/bottom_player.dart';
+import 'package:music_player/presentation/pages/file_list.dart';
+import 'package:music_player/presentation/pages/folder_list.dart';
+import 'package:music_player/domain/providers/providers.dart';
 
-/// The main page with the bottom player, all other pages are included in this page
+// 带有底部播放器的总页面，所有其他页面都被包括在此页面之内
 class BasePage extends ConsumerStatefulWidget {
-  /// The main page with the bottom player, all other pages are included in this page
   const BasePage({super.key});
 
   @override
@@ -17,11 +16,12 @@ class BasePage extends ConsumerStatefulWidget {
 }
 
 class BasePageState extends ConsumerState<BasePage> {
-  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+  // final audioPlayer = AudioPlayer();
+  final audioPlayer = GetIt.instance<AudioPlayer>();
 
   int _currentPageIndex = 0;
 
-  // Navigation method for switching between folder pages and file pages
+  // 用于切换文件夹页面和文件页面的导航方法
   void _navigateToPage(int index) {
     setState(() {
       _currentPageIndex = index;
@@ -31,19 +31,7 @@ class BasePageState extends ConsumerState<BasePage> {
   @override
   void initState() {
     super.initState();
-    audioPlayer.onErrorDo = (handler) {
-      // It shows network error from assets audio player package, when some of the audio files
-      if (handler.error.errorType == AssetsAudioPlayerErrorType.Network) {
-        if (audioPlayer.loopMode.value == LoopMode.playlist) {
-          handler.player.next();
-        } else {
-          handler.player.stop();
-          handler.player.seek(Duration.zero);
-          handler.player.play();
-        }
-      }
-      // TODO log the error
-    };
+    audioPlayer.setLoopMode(LoopMode.all);
   }
 
   @override
@@ -60,7 +48,7 @@ class BasePageState extends ConsumerState<BasePage> {
           if (didPop) {
             return;
           }
-          // When the system back button is clicked, execute _navigateToPage to return to the previous page
+          // 当点击系统返回按钮时，执行_navigateToPage返回上一个页面
           List<int> navigationHistory = ref.watch(navigationHistoryProvider);
           if (navigationHistory.isNotEmpty) {
             _navigateToPage(navigationHistory.removeAt(navigationHistory.length - 1));
@@ -70,7 +58,7 @@ class BasePageState extends ConsumerState<BasePage> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Center(child: Text('SHY Music Player')),
+            title: const Center(child: Text('CZ Music Player')),
           ),
           body: IndexedStack(
             index: _currentPageIndex,

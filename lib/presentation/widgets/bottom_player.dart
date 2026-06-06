@@ -1,54 +1,56 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player/presentation/widgets/play_pause_replay_button.dart';
-import 'package:audio_player/presentation/pages/audio_player_bottom_sheet.dart';
-import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:music_player/presentation/widgets/album_cover.dart';
+import 'package:music_player/presentation/widgets/play_pause_replay_button.dart';
+import 'package:music_player/presentation/pages/audio_player_bottom_sheet.dart';
 
-/// The bottom player bar, which contains the album img, name, play or pause button
-class BottomPlayer extends StatefulWidget {
-  /// The bottom player bar, which contains the album img, name, play or pause button
+class BottomPlayer extends ConsumerStatefulWidget {
   const BottomPlayer({super.key});
 
   @override
   BottomPlayerState createState() => BottomPlayerState();
 }
 
-class BottomPlayerState extends State<BottomPlayer> {
-  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+class BottomPlayerState extends ConsumerState<BottomPlayer> {
+  final audioPlayer = GetIt.instance<AudioPlayer>();
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Playing?>(
-      stream: audioPlayer.current,
+    return StreamBuilder<SequenceState?>(
+      stream: audioPlayer.sequenceStateStream,
       builder: (context, snapshot) {
         final state = snapshot.data;
         late bool hasSelectedAudio;
-        if (state?.audio.assetAudioPath.isEmpty ?? true) {
+        if (state?.sequence.isEmpty ?? true) {
           hasSelectedAudio = false;
         } else {
           hasSelectedAudio = true;
         }
-        final mediaItem = hasSelectedAudio ? state!.audio.audio.metas : Metas();
-        final audioName = mediaItem.title ?? 'Please select an audio';
+        final mediaItem = hasSelectedAudio
+            ? state!.currentSource!.tag as MediaItem
+            : const MediaItem(id: '', title: '');
+        final audioName = mediaItem.title.isNotEmpty ? mediaItem.title : 'Please select an audio';
         return GestureDetector(
           onTap: hasSelectedAudio
               ? () {
-                  // Click the bottom play bar to open the player bottom sheet
+                  // 点击底部播放栏，打开播放器bottom sheet
                   showModalBottomSheet(
-                      // Unlock height limit of the bottom sheet
+                      // bottom sheet 解锁高度限制
                       isScrollControlled: true,
-                      // Re-limit height
-                      constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height / 1.3),
+                      // 重新限制高度
+                      constraints:
+                          BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 1.3),
                       context: context,
                       builder: (_) {
-                        return const AudioPlayerBottomSheet();
+                        return AudioPlayerBottomSheet();
                       });
                 }
               : null,
           child: Container(
-            // TODO Better size control
-            height: 60, // Adjust the height of the floating player
+            height: 60, // 调整悬浮播放器的高度
             decoration: BoxDecoration(
               color: Colors.grey,
               boxShadow: [
@@ -66,10 +68,10 @@ class BottomPlayerState extends State<BottomPlayer> {
                 const SizedBox(
                   width: 20,
                 ),
-                // TODO Better size control
+                // 音乐封面
                 AlbumCover(
                   size: 40,
-                  albumArt: mediaItem.extra?['albumArt'],
+                  albumArt: mediaItem.extras?['albumArt'],
                 ),
                 const SizedBox(
                   width: 20,
@@ -77,7 +79,6 @@ class BottomPlayerState extends State<BottomPlayer> {
                 Expanded(child: Text(audioName)),
                 if (hasSelectedAudio)
                   // 播放/暂停/重播按钮
-                  // TODO Better size control
                   const PlayPauseReplayButton(
                     iconSize: 40,
                   ),

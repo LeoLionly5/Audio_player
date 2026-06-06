@@ -1,18 +1,18 @@
 import 'dart:io';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player/providers/providers.dart';
-import 'package:audio_player/presentation/widgets/album_cover.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:music_player/presentation/widgets/album_cover.dart';
+import 'package:music_player/domain/providers/providers.dart';
 
 import '../../utils/common_functions.dart';
 
-/// Music file list page
+// 音乐文件列表页面
 class FileList extends ConsumerStatefulWidget {
-  /// Music file list page
   const FileList({super.key, required this.navigateToPage});
 
   final Function(int) navigateToPage;
@@ -22,18 +22,14 @@ class FileList extends ConsumerStatefulWidget {
 }
 
 class _FileListState extends ConsumerState<FileList> with WidgetsBindingObserver {
-  final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
-
-  Future<Playlist?> _scanFiles(String folderPath, WidgetRef ref) async {
-    final playList = Playlist(audios: []);
-
+  Future<List<UriAudioSource>?> _scanFiles(String folderPath, WidgetRef ref) async {
+    List<UriAudioSource> playList = [];
     Directory directory = Directory(folderPath);
     try {
       List<FileSystemEntity> entities = directory.listSync();
       for (FileSystemEntity entity in entities) {
         if (entity is File && isAudio(entity.path)) {
-          final mediaMetas = await getMediaMetas(entity.path);
-          playList.audios.add(Audio.file(entity.path, metas: mediaMetas));
+          playList.add(AudioSource.file(entity.path, tag: await getMediaItem(entity.path)));
         }
       }
       return playList;
@@ -45,31 +41,16 @@ class _FileListState extends ConsumerState<FileList> with WidgetsBindingObserver
     return null;
   }
 
-  Future<void> _onMusicClicked(int index, Playlist playList) async {
-    await audioPlayer.open(playList..startIndex = index,
-        loopMode: LoopMode.playlist,
-        showNotification: true,
-        notificationSettings: const NotificationSettings(
-          stopEnabled: false,
-          // prevEnabled: false, //disable the previous button
-
-          //and have a custom next action (will disable the default action)
-          //         customStopAction: (player) async {
-          //   print(
-          //       "nextnextnextnextnextnextnextnextnextnextnextnextnextnextnextnextnext");
-          //   const url = 'shyMusicPlayer'; // 这是本应用的 URL Scheme
-
-          //   final AndroidIntent intent = const AndroidIntent(
-          //     action: 'action_view',
-          //     data:
-          //         'com.example.audio_player', // replace com.example.app with your applicationId
-          //   );
-          //   await intent.launch();
-        ));
+  Future<void> _onMusicClicked(
+      int index, List<UriAudioSource> playList, AudioPlayer audioPlayer) async {
+    await audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playList),
+        initialIndex: index, preload: false); // 设置preload为false，并用play()隐式加载音频。否则会有第一次播放不从头的bug
+    audioPlayer.play();
   }
 
   @override
   Widget build(BuildContext context) {
+    final audioPlayer = GetIt.instance<AudioPlayer>();
     return FutureBuilder(
         future: _scanFiles(ref.watch(currentFolderPathProvider), ref),
         builder: (context, snapshot) {
@@ -86,20 +67,20 @@ class _FileListState extends ConsumerState<FileList> with WidgetsBindingObserver
                   thickness: 2,
                 );
               },
-              itemCount: playList.audios.length,
+              itemCount: playList.length,
               itemBuilder: (context, index) {
-                final mediaMetas = playList.audios[index].metas;
-                final trackName = mediaMetas.title;
-                final artistName = mediaMetas.artist ?? 'Unknown artist';
-                final albumName = mediaMetas.album ?? 'Unknown album';
+                final mediaItem = playList[index].tag as MediaItem;
+                final trackName = mediaItem.title;
+                final artistName = mediaItem.artist ?? 'Unknown artist';
+                final albumName = mediaItem.album ?? 'Unknown album';
                 return ListTile(
                   leading: AlbumCover(
                     size: 40,
-                    albumArt: mediaMetas.extra?['albumArt'],
+                    albumArt: mediaItem.extras?['albumArt'],
                   ),
-                  title: Text(trackName!),
+                  title: Text(trackName),
                   subtitle: Text('$artistName - $albumName'),
-                  onTap: () => _onMusicClicked(index, playList),
+                  onTap: () => _onMusicClicked(index, playList, audioPlayer),
                 );
               },
             );

@@ -1,35 +1,35 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
 
-/// Play back order button
-class PlaybackOrderButton extends StatelessWidget {
-  /// Play back order button
+// 播放顺序按钮
+class PlaybackOrderButton extends ConsumerWidget {
   const PlaybackOrderButton({super.key, required this.iconSize});
   final double iconSize;
 
   @override
-  Widget build(BuildContext context) {
-    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final audioPlayer = GetIt.instance<AudioPlayer>();
     return StreamBuilder<LoopMode>(
-      stream: audioPlayer.loopMode,
+      stream: audioPlayer.loopModeStream,
       builder: (context, snapshot) {
-        final loopMode = snapshot.data ?? LoopMode.playlist;
+        final loopMode = snapshot.data ?? LoopMode.all;
         final icons = [
           Icon(Icons.repeat, color: IconTheme.of(context).color!),
           Icon(Icons.repeat_one, color: IconTheme.of(context).color!),
         ];
         const cycleModes = [
-          LoopMode.playlist,
-          LoopMode.single,
+          LoopMode.all,
+          LoopMode.one,
         ];
         final index = cycleModes.indexOf(loopMode);
         return IconButton(
           icon: icons[index],
           iconSize: iconSize,
           onPressed: () {
-            audioPlayer.setLoopMode(cycleModes[
-                (cycleModes.indexOf(loopMode) + 1) % cycleModes.length]);
+            audioPlayer
+                .setLoopMode(cycleModes[(cycleModes.indexOf(loopMode) + 1) % cycleModes.length]);
           },
         );
       },
@@ -46,56 +46,41 @@ class PlaybackOrderButton extends StatelessWidget {
 }
 
 // 上一首音乐按钮
-class PreviousButton extends StatelessWidget {
+class PreviousButton extends ConsumerWidget {
   const PreviousButton({super.key, required this.iconSize});
   final double iconSize;
 
   @override
-  Widget build(BuildContext context) {
-    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
-    // return StreamBuilder<SequenceState?>(
-    //   stream: player.sequenceStateStream,
-    //   builder: (context, snapshot) => IconButton(
-    //     icon: const Icon(Icons.skip_previous),
-    //     iconSize: iconSize,
-    //     onPressed: player.hasPrevious ? player.seekToPrevious : null,
-    //   ),
-    // );
-    return IconButton(
-      icon: const Icon(Icons.skip_previous),
-      iconSize: iconSize,
-      onPressed: audioPlayer.previous,
-      // onPressed: () => player.seek(Duration.zero, index: 0),
-      // onPressed: () => player.seek(Duration.zero, index: 3),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final audioPlayer = GetIt.instance<AudioPlayer>();
+
+    return StreamBuilder<SequenceState?>(
+      stream: audioPlayer.sequenceStateStream,
+      builder: (context, snapshot) => IconButton(
+        icon: const Icon(Icons.skip_previous),
+        iconSize: iconSize,
+        onPressed: audioPlayer.hasPrevious ? audioPlayer.seekToPrevious : null,
+      ),
     );
   }
 }
 
 // 下一首音乐按钮
-class NextButton extends StatelessWidget {
+class NextButton extends ConsumerWidget {
   const NextButton({super.key, required this.iconSize});
   final double iconSize;
 
   @override
-  Widget build(BuildContext context) {
-    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final audioPlayer = GetIt.instance<AudioPlayer>();
     // player.loopMode
-    // return StreamBuilder<SequenceState?>(
-    //   stream: player.sequenceStateStream,
-    //   builder: (context, snapshot) => IconButton(
-    //     icon: const Icon(Icons.skip_next),
-    //     iconSize: iconSize,
-    //     onPressed: player.n .hasNext ? player.next() : null,
-    //     // onPressed: () => player.seek(Duration.zero, index: 0),
-    //     // onPressed: () => player.seek(Duration.zero, index: 3),
-    //   ),
-    // );
-    return IconButton(
-      icon: const Icon(Icons.skip_next),
-      iconSize: iconSize,
-      onPressed: audioPlayer.next,
-      // onPressed: () => player.seek(Duration.zero, index: 0),
-      // onPressed: () => player.seek(Duration.zero, index: 3),
+    return StreamBuilder<SequenceState?>(
+      stream: audioPlayer.sequenceStateStream,
+      builder: (context, snapshot) => IconButton(
+        icon: const Icon(Icons.skip_next),
+        iconSize: iconSize,
+        onPressed: audioPlayer.hasNext ? audioPlayer.seekToNext : null,
+      ),
     );
   }
 }

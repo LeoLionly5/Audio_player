@@ -1,21 +1,19 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_player/presentation/widgets/play_pause_replay_button.dart';
-import 'package:audio_player/presentation/widgets/previous_next_playback_order_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:music_player/presentation/widgets/play_pause_replay_button.dart';
+import 'package:music_player/presentation/widgets/previous_next_playback_order_buttons.dart';
 
-/// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
 class ControlButtons extends StatelessWidget {
-  /// Control buttons, which contains Adjust speed, previous, play/pause, next, playback order
   const ControlButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final audioPlayer = GetIt.instance<AssetsAudioPlayer>();
+    final audioPlayer = GetIt.instance<AudioPlayer>();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Adjust the volume, the root system volume is out of sync, temporarily removed
+        // 调整音量，和系统音量不同步，暂时移除
         // IconButton(
         //   icon: const Icon(Icons.volume_up),
         //   onPressed: () {
@@ -31,9 +29,9 @@ class ControlButtons extends StatelessWidget {
         //     );
         //   },
         // ),
-        // Playback speed adjustment
+        // 播放速度调节
         StreamBuilder<double>(
-          stream: audioPlayer.playSpeed,
+          stream: audioPlayer.speedStream,
           builder: (context, snapshot) => IconButton(
             icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
                 style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -44,27 +42,23 @@ class ControlButtons extends StatelessWidget {
                 divisions: 10,
                 min: 0.5,
                 max: 1.5,
-                value: snapshot.data ?? 0,
-                stream: audioPlayer.playSpeed,
-                onChanged: audioPlayer.setPlaySpeed,
+                value: audioPlayer.speed,
+                stream: audioPlayer.speedStream,
+                onChanged: audioPlayer.setSpeed,
               );
             },
           ),
         ),
         const PreviousButton(
-          // TODO Better size control
           iconSize: 40,
         ),
         const PlayPauseReplayButton(
-          // TODO Better size control
           iconSize: 64,
         ),
         const NextButton(
-          // TODO Better size control
           iconSize: 40,
         ),
         const PlaybackOrderButton(
-          // TODO Better size control
           iconSize: 30,
         )
       ],
@@ -95,9 +89,7 @@ class ControlButtons extends StatelessWidget {
               children: [
                 Text('${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
                     style: const TextStyle(
-                        fontFamily: 'Fixed',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24.0)),
+                        fontFamily: 'Fixed', fontWeight: FontWeight.bold, fontSize: 24.0)),
                 Slider(
                   divisions: divisions,
                   min: min,
