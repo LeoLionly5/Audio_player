@@ -3,12 +3,12 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:label="audio_player"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- android:name="com.ryanheise.audioservice.AudioServiceActivity" -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
